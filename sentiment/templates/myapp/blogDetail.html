@@ -1,0 +1,12 @@
+{% extends "base.html"%}
+{%block content%}
+<strong>{{ blog.creator_nickname }}</strong>
+<ul>
+    <li>{{ blog.blog_content}}</li>
+    <li>{{ blog.creator_nickname}}</li>
+    <li>{{ blog.created_time}}</li>
+    <li>{{ blog.sentiment}}</li>
+<!--    <li>{{ blog.sentiment_score}}</li>-->
+
+</ul>
+{%block content%}

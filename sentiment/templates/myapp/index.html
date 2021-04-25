@@ -1,8 +1,12 @@
-<!DOCTYPE html>
-
-<html lang="zh-Hans" dir="ltr">
-<head>
-<title>抑郁症话题 | 站点管理员</title>
-<body>
-</body>
-</html>
+{% extends "base.html" %}
+{%block content%}
+    {% if fan_list %}
+        <ul>
+        {% for fan in fan_list %}
+            <li><a href="{% url 'detail' fan.id}}">{{fan.creator_nickname}}</a></li>
+        {% endfor %}
+        </ul>>
+    {% else %}
+        <p> No fans.</p>>
+    {% endif %}
+{%endblock%}

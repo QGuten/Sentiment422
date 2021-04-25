@@ -5,7 +5,9 @@ from pyquery import PyQuery as pq
 import random
 import time
 import csv
+import re
 import pandas as pd
+import decimal
 import jsonpath
 
 from datamanage import DataManager
@@ -32,7 +34,7 @@ headers = {
     # 'X-Xsrf-Token': 'a08d05',
 }
 
-max_page = 300
+max_page = 100
 
 def get_page(page, since_id: str):
     params = {
@@ -51,7 +53,7 @@ def get_page(page, since_id: str):
     # print('page:{},新取的url：{}'%(page,url))
     print(url)
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify = False)
         print(response)
         if response.status_code == 200:
             # response = response.text
@@ -85,12 +87,20 @@ def save_to_csv(resource_data):
     # print(type(resource_data))    # tuple
     resource_data = list(resource_data)
     # print(type(resource_data))    # list
-    save = pd.DataFrame([resource_data], columns = ['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time', 'sentiment_score','sentiment'])    # columns=['blog_id','creator_id','creator_nickname', 'blog_content', 'thumbnail_pic','collection_count', 'comment_count', 'repost_count', 'create_time']
+    save = pd.DataFrame([resource_data], columns = ['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time','sentiment','sentiment_score'])    # columns=['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time','sentiment','score']]
     try:
         save.to_csv(file_name, mode='a', header=0, index=0)
         print("写入成功\n")
     except UnicodeEncodeError:
         print("编码错误，数据转换失败，无法写入。")
+
+def clean_content(text):
+    str = re.sub('[a-zA-Z0-9’!"#$%&\'()*+,-./:;<=>?@，。?★、…【】《》？“”‘’！[\\]^_`{|}~\s]+', "", text)
+    # 去除不可见字符
+    str = re.sub(
+        '[\001\002\003\004\005\006\007\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a]+','',text)
+    return str
+
 
 def get_score(text):
     df = pd.read_table(r"dataset\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
@@ -100,15 +110,17 @@ def get_score(text):
     segs = jieba.lcut(text, cut_all=False)  # 返回list
     # 计算得分
     score_list = [score[key.index(x)] for x in segs if (x in key)]
-    score = format(sum(score_list), '.4f')
+    score = round(sum(score_list),2)
     return score
 
 def get_sentiment(score):
     # nonlocal sentiment = '暂未计算'
-    if score > 0.7:
+    if score > 80:
         sentiment = '积极'
-    else:
+    elif score<35:
         sentiment = '消极'
+    else:
+        sentiment = '中性'
     return sentiment
 
 def parse_page(json, page: int):
@@ -172,14 +184,15 @@ def parse_page(json, page: int):
             fans_data = (blog['creator_id'],blog['creator_nickname'],blog['creator_gender'])
 
             try:
-                score = get_score(blog_content)
-                sentiment = get_sentiment(score)
+                content = clean_content(blog_content)
+                sentiment_score = get_score(content)
+                sentiment = get_sentiment(sentiment_score)
             except:
                 sentiment = '计算情感失败'
                 pass
 
             data = (blog['blog_id'], blog['creator_nickname'], blog['blog_content'], blog['creator_id'],
-                    blog['created_time'],score,sentiment)  # 是个元组
+                    blog['created_time'],sentiment, sentiment_score)  # 是个元组,sentiment,score
 
             print('parse_page函数中的打印data:' + str(data))
             print('parse_page函数中的打印page:'+str(page))
@@ -190,7 +203,7 @@ def parse_page(json, page: int):
             is_creator_exist = db.is_creator_existed(creator_id)
             if is_creator_exist == 1:
                 print('------------- 已存过该用户信息，下一个 -----------\n')
-                continue    # 根据blog_id判断，已经存过则跳过解析本条微博
+                continue    # 根据creator_id判断，已经存过则跳过存储该粉丝信息
             else:
                 db.save_fans_to_mysql(fans_data)
 
@@ -203,10 +216,16 @@ if __name__ == '__main__':
     # since_id = '4108231562017875'
     # db.create_t_blogs()
     for page in range(1, max_page + 1):
-        print('main函数中打印的page:'+str(page))
+        # print('main函数中打印的page:'+str(page))
         print('main函数中打印的since_id:'+str(since_id))
         json = get_page(page, since_id) # 根据获取的since_id请求新的一页
+        since_id = parse_page(*json)    # 获取下一页的since_id
+
         # print(type(json)) # tuple
         # print(since_id, *json)
-        since_id = parse_page(*json)    # 获取下一页的since_id
+        # try:
+        #     since_id = parse_page(*json)    # 获取下一页的since_id
+        # except:
+        #     since_id=''
+        #     pass
         time.sleep(random.uniform(4,10))

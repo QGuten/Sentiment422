@@ -36,22 +36,19 @@ class DataManager():
         # 数据库操作
 
         table = "blogs"
-        insert_sql_blogs= '''insert into blogs (blog_id, creator_nickname, blog_content, creator_id, created_time, sentiment_score, sentiment) values(%s,%s,%s,%s,%s,%f,%s)'''
-        #
-        # (2)准备数据
-        # data = ('nancy','30','100','太好笑了')
-        # (3)操作
-        #repetition = self.cursor.fetchone()
-
+        insert_blogs = '''insert into blogs (blog_id, creator_nickname, blog_content, creator_id, created_time, sentiment, sentiment_score) values(%s,%s,%s,%s,%s,%s,%s);'''
+        #, sentiment, sentiment_score ,%s,%f
         try:
             print("准备插入数据")
-            self.cursor.execute(insert_sql_blogs, data)
+            self.cursor.execute(insert_blogs, data)
             self.conn.commit()
             print('插入成功')
         except Exception as e:
             # 错误时回滚
             print('插入失败，具体见数据库报错')
             self.conn.rollback()  # 回滚
+            # print("数据库错误，原因%d: %s" % (e.args[0], e.args[1]))
+            #
             # if "key 'PRIMARY'" in e.args[1]:
             #     print('数据已存在，未插入数据')
             # else:
@@ -62,7 +59,7 @@ class DataManager():
         # 数据库操作
 
         table = "supertopic_fans"
-        insert_sql_fans= '''insert into supertopic_fans (creator_id, creator_nickname, creator_gender) values(%s,%s,%s)'''
+        insert_sql_fans= '''insert into supertopic_fans (creator_id, creator_nickname, creator_gender) values(%s,%s,%s);'''
         #
         # (2)准备数据
         # data = ('nancy','30','100','太好笑了')
