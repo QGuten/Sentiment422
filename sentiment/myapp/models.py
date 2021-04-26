@@ -2,10 +2,10 @@ from django.db import models
 
 # Create your models here.
 class BlogInfo(models.Model):
-    blog_id = models.CharField(max_length=32,blank=True,null=True)
-    creator_nickname = models.CharField(max_length=64,verbose_name='用户昵称')
+    blog_id = models.CharField(primary_key=True,max_length=32,blank=True)
+    creator_nickname = models.CharField(max_length=32,blank=True,null=True,verbose_name='微博发布者昵称')
     blog_content = models.CharField(max_length=1024,verbose_name='微博文本')
-    creator_id = models.CharField(max_length=64,verbose_name='用户微博ID')
+    creator = models.ForeignKey('CreatorInfo',on_delete=models.DO_NOTHING,related_name='微博发布者ID')
     created_time = models.CharField(max_length=128,blank=True,null=True,verbose_name='微博发布时间')
     sentiment = models.CharField(max_length=16, blank=True, null=True,verbose_name='微博情感偏向')
     sentiment_score = models.FloatField(blank=True, null=True,verbose_name='微博情感分值')
@@ -18,10 +18,9 @@ class BlogInfo(models.Model):
     def __str__(self):
         return self.blog_content
 
-
 # 粉丝模型
 class CreatorInfo(models.Model):
-    creator_id = models.CharField(max_length=64,verbose_name='用户微博ID')
+    creator_id = models.CharField(primary_key=True,max_length=64,verbose_name='用户微博ID')
     creator_nickname = models.CharField(max_length=64,verbose_name='用户昵称')
     creator_gender = models.CharField(max_length=16,verbose_name='用户性别')
     blog_counts = models.IntegerField(blank=True, null=True,verbose_name='用户超话发帖数')

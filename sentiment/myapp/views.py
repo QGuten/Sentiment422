@@ -41,9 +41,11 @@ def addRemark(request,id):
         remark_text.save()
         return HttpResponseRedirect(args=(creator.id,))
 
-def supertopic_wordcloud(request):
+# def supertopic_wordcloud(request):
     
 
 
 def cul_fan_blogs(request,creator_id):
-    creator_id =
+    creator= BlogInfo.objects.filter(creator_id=creator_id)
+    creator.blog_counts = BlogInfo.objects.filter(creator_id).counts()
+    creator.save()
