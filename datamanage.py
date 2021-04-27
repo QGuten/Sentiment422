@@ -36,7 +36,7 @@ class DataManager():
         # 数据库操作
 
         table = "blogs"
-        insert_blogs = '''insert into blogs (blog_id, creator_nickname, blog_content, creator_id, created_time, sentiment, sentiment_score) values(%s,%s,%s,%s,%s,%s,%s);'''
+        insert_blogs = '''insert into blogs (blog_id, creator_nickname, blog_content, creator_id, created_time) values(%s,%s,%s,%s,%s);'''
         #, sentiment, sentiment_score ,%s,%f
         try:
             print("准备插入数据")

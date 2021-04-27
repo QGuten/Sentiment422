@@ -22,7 +22,7 @@ class BlogInfo(models.Model):
 class CreatorInfo(models.Model):
     creator_id = models.CharField(primary_key=True,max_length=64,verbose_name='用户微博ID')
     creator_nickname = models.CharField(max_length=64,verbose_name='用户昵称')
-    creator_gender = models.CharField(max_length=64,verbose_name='用户性别')
+    creator_gender = models.CharField(max_length=64,null=True,verbose_name='用户性别',default='f')
     blog_counts = models.IntegerField(blank=True, null=True,verbose_name='用户超话发帖数')
     creator_sentiment = models.CharField(max_length=16, blank=True, null=True,verbose_name='用户情感偏向')
     creator_sentiment_score = models.FloatField(blank=True, null=True,verbose_name='用户情感分值')
@@ -35,4 +35,5 @@ class CreatorInfo(models.Model):
 
     def __str__(self):
         return self.creator_nickname
+
 

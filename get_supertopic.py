@@ -34,7 +34,7 @@ headers = {
     # 'X-Xsrf-Token': 'a08d05',
 }
 
-max_page = 50
+max_page = 1
 
 def get_page(page, since_id: str):
     params = {
@@ -87,7 +87,7 @@ def save_to_csv(resource_data):
     # print(type(resource_data))    # tuple
     resource_data = list(resource_data)
     # print(type(resource_data))    # list
-    save = pd.DataFrame([resource_data], columns = ['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time','sentiment','sentiment_score'])    # columns=['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time','sentiment','score']]
+    save = pd.DataFrame([resource_data], columns = ['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time'])    # columns=['blog_id', 'creator_nickname', 'blog_content', 'creator_id', 'created_time','sentiment','score']]
     try:
         save.to_csv(file_name, mode='a', header=0, index=0)
         print("写入成功\n")
@@ -126,8 +126,8 @@ def get_sentiment(score):
 def parse_page(json, page: int):
     # print(type(json))
     # print(json)
-    global sentiment
-    sentiment = '暂未计算'
+    # global sentiment
+    # sentiment = '暂未计算'
     while json:
         try:
             since_id = json.get('data').get('pageInfo').get('since_id')
@@ -183,21 +183,21 @@ def parse_page(json, page: int):
 
             fans_data = (blog['creator_id'],blog['creator_nickname'],blog['creator_gender'])
 
-            try:
-                content = clean_content(blog_content)
-                sentiment_score = get_score(content)
-                sentiment = get_sentiment(sentiment_score)
-            except:
-                sentiment = '计算情感失败'
-                pass
+            # try:
+            #     content = clean_content(blog_content)
+            #     sentiment_score = get_score(content)
+            #     sentiment = get_sentiment(sentiment_score)
+            # except:
+            #     sentiment = '计算情感失败'
+            #     pass
 
             data = (blog['blog_id'], blog['creator_nickname'], blog['blog_content'], blog['creator_id'],
-                    blog['created_time'],sentiment, sentiment_score)  # 是个元组,sentiment,score
+                    blog['created_time'])  # 是个元组,sentiment,score
 
             print('parse_page函数中的打印data:' + str(data))
             print('parse_page函数中的打印page:'+str(page))
             # 微博内容、微博id、微博创建者昵称 存储到csv
-            save_to_csv(data)
+            # save_to_csv(data)
             db.save_data_to_mysql(data)
 
             is_creator_exist = db.is_creator_existed(creator_id)

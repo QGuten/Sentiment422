@@ -29,7 +29,7 @@ class BlogInfoAdmin(admin.ModelAdmin):
     # 设置每页显示数据量
     list_per_page = 10
     #设置可搜索的字段
-    search_fields = ['creator_nickname']
+    search_fields = ['creator_nickname','creator_id']
     # 在数据新增页或修改页设置可编辑的字段
     fields = ['blog_content','creator_nickname','created_time','sentiment', 'sentiment_score']
     # 在新增/修改页设置不可编辑的字段
@@ -50,7 +50,7 @@ class BlogInfoAdmin(admin.ModelAdmin):
 
 class CreatorInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
-    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text']
+    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text','blogs_by']
     #
     readonly_fields = ['creator_nickname', 'creator_id','creator_gender','blog_counts', 'creator_sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
@@ -63,6 +63,7 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     search_fields = ['creator_id','creator_nickname']
     # 在数据新增页或修改页设置可编辑的字段
     fields = ['creator_id','creator_nickname','creator_gender','blog_counts', 'creator_sentiment_score', 'remark_text']
+
     # # 在新增/修改页设置不可编辑的字段
     # exclude = ['blog_counts','creator_sentiment_score']
     # 改变某个字段的文本框
@@ -78,6 +79,14 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     preserve_filters = True
     def has_change_permission(self, request, obj=None):
         return True
+
+    # 添加自定义超链接列字段
+    def blogs_by(self,obj):
+        url = "http://127.0.0.1:8000/myapp/bloginfo/?q=%s"% obj.creator_nickname
+        url_text = "ta的发帖"
+        return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url,url_text))
+    blogs_by.allow_tags = True
+    blogs_by.short_description = 'ta的发帖'
     # 添加自定义按钮
     # actions = ['blogs_by_creator']
     # def blogs_by_creator(self, request):
