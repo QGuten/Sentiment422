@@ -34,7 +34,7 @@ headers = {
     # 'X-Xsrf-Token': 'a08d05',
 }
 
-max_page = 100
+max_page = 50
 
 def get_page(page, since_id: str):
     params = {
@@ -211,7 +211,8 @@ def parse_page(json, page: int):
             # time.sleep(random.uniform(2,4))
         return since_id  # yield表示返回值则表示该函数是个生成器。
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
+def get_supertopic():
     since_id = ''
     # since_id = '4108231562017875'
     # db.create_t_blogs()

@@ -4,8 +4,8 @@ from django.db import models
 class BlogInfo(models.Model):
     blog_id = models.CharField(primary_key=True,max_length=32,blank=True)
     creator_nickname = models.CharField(max_length=32,blank=True,null=True,verbose_name='微博发布者昵称')
-    blog_content = models.CharField(max_length=1024,verbose_name='微博文本')
-    creator = models.ForeignKey('CreatorInfo',on_delete=models.DO_NOTHING,related_name='微博发布者ID')
+    creator_id = models.CharField(max_length=64,default='超级管理员',verbose_name='微博发布者ID')
+    blog_content = models.CharField(max_length=1024, verbose_name='微博文本')
     created_time = models.CharField(max_length=128,blank=True,null=True,verbose_name='微博发布时间')
     sentiment = models.CharField(max_length=16, blank=True, null=True,verbose_name='微博情感偏向')
     sentiment_score = models.FloatField(blank=True, null=True,verbose_name='微博情感分值')
@@ -22,7 +22,7 @@ class BlogInfo(models.Model):
 class CreatorInfo(models.Model):
     creator_id = models.CharField(primary_key=True,max_length=64,verbose_name='用户微博ID')
     creator_nickname = models.CharField(max_length=64,verbose_name='用户昵称')
-    creator_gender = models.CharField(max_length=16,verbose_name='用户性别')
+    creator_gender = models.CharField(max_length=64,verbose_name='用户性别')
     blog_counts = models.IntegerField(blank=True, null=True,verbose_name='用户超话发帖数')
     creator_sentiment = models.CharField(max_length=16, blank=True, null=True,verbose_name='用户情感偏向')
     creator_sentiment_score = models.FloatField(blank=True, null=True,verbose_name='用户情感分值')
