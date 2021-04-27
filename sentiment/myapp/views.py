@@ -32,6 +32,7 @@ try:
 
     @register_job(scheduler, "interval", minutes=5,id='cul_fan_blogs',  replace_existing=True)
     def cul_fan_blogs():
+        '''计算某作者贴子数（计算爬取到的）'''
         print('任务二：计算微博数量')
         creators_list=CreatorInfo.objects.values_list('creator_id', flat=True)
         for creator in creators_list:
