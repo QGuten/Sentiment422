@@ -1,9 +1,13 @@
 from django.contrib import admin
 from django.forms import Textarea
 from django.utils.html import format_html
+import jieba
+import jieba.analyse
+import sys
 
 from .models import *
 # Register your models here.
+
 admin.site.site_title = '抑郁症超话情感分析系统'
 admin.site.site_header = '抑郁症超话情感分析系统'
 admin.site.index_title = '抑郁症超话情感分析系统'
@@ -18,7 +22,7 @@ admin.site.index_title = '抑郁症超话情感分析系统'
 #定义一个类，继承admin.ModelAdmin
 class BlogInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
-    list_display = ['blog_content','creator_nickname', 'created_time',]
+    list_display = ['blog_content','creator_nickname', 'sentiment','blog_keyword']
     readonly_fields = ['blog_content','creator_nickname', 'created_time', 'sentiment', 'sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     list_display_links = []
@@ -39,6 +43,16 @@ class BlogInfoAdmin(admin.ModelAdmin):
     # 禁用删除按钮
     def has_delete_permission(self, request, obj=None):
         return False
+    # 生成自定义列关键词
+    def blog_keyword(self, obj):
+        stopwords_file = 'E:\\Sentiment\\dataset\\stopword2.txt'
+        jieba.analyse.set_stop_words(stopwords_file)
+        blog_content = obj.blog_content
+        keyword = jieba.analyse.extract_tags(blog_content, topK=3)
+        # print(keyword)
+        return keyword
+    blog_keyword.allow_tags = True
+    blog_keyword.short_description = '关键词'
 
 class CreatorInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
@@ -72,6 +86,7 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     # 允许修改
     def has_change_permission(self, request, obj=None):
         return True
+
     # 添加自定义超链接列字段
     def blogs_by(self,obj):
         url = "http://127.0.0.1:8000/myapp/bloginfo/?q=%s"% obj.creator_nickname
@@ -79,6 +94,15 @@ class CreatorInfoAdmin(admin.ModelAdmin):
         return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url,url_text))
     blogs_by.allow_tags = True
     blogs_by.short_description = 'ta的发帖'
+
+    # 添加词云页面入口
+    # def creator_wordcloud(self,obj):
+    #     url = "http://127.0.0.1:8000/myapp/creatorinfo/%s"%obj.creator_id
+    #     url_text = 'ta的词云'
+    #     return format_html(u'<a href="{}" target=_blank">{}</a>'.format(url,url_text))
+    # creator_wordcloud.allow_tags = True
+    # creator_wordcloud.short_description = 'ta的词云'
+
     # 添加自定义按钮
     # actions = ['blogs_by_creator']
     # def blogs_by_creator(self, request):

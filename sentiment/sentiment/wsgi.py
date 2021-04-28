@@ -13,4 +13,6 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sentiment.settings')
 
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sentiment.pro_settings')     # 修改为复制新的settings文件名
+
 application = get_wsgi_application()

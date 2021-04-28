@@ -15,9 +15,44 @@ sys.path.append(r'E:\Sentiment')
 
 from .models import BlogInfo
 from .models import CreatorInfo
-import get_supertopic as g
+import get_supertopic
+# import cul_blog_sentiment
 
 # Create your views here.
+
+# def supertopic_wordcloud(request):
+
+# 随django服务启动，开始爬取超话数据
+# get_supertopic.get_supertopic()
+# 计算微博情感值
+def cul_blog_sentiment():
+    '''计算微博的情感'''
+    df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
+    key = df['key'].values.tolist()
+    score = df['score'].values.tolist()
+    objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
+    # print(objs)
+    for obj in objs:
+        blog_content = obj.blog_content
+        # print(blog_content)
+        blog_id = obj.blog_id
+        # print(blog_id)
+        segs = jieba.lcut(blog_content, cut_all=False)  # 返回list
+        # 计算得分
+        score_list = [score[key.index(x)] for x in segs if (x in key)]
+        sentiment_score = sum(score_list)
+        if sentiment_score >30:
+            sentiment = '积极'
+        elif sentiment_score < -7:
+            sentiment = '消极'
+        else:
+            sentiment = '中性'
+        # print(score,sentiment)
+        BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment,sentiment_score=sentiment_score)
+        continue
+    print('计算完毕')
+cul_blog_sentiment()
+
 # try:
 #     scheduler = BackgroundScheduler()
 #     scheduler.add_jobstore(DjangoJobStore(), 'default')
@@ -67,11 +102,6 @@ def blogDetail(request, id):
         raise Http404('不存在')
     return render(request,'blogDetail.html',{'blog':blog})
 
-# def supertopic_wordcloud(request):
-
-# 随django服务启动，开始爬取超话数据
-# g.get_supertopic()
-
 def cul_fan_blogs():
     '''计算某作者贴子数（计算爬取到的）'''
     print('任务二：计算微博数量')
@@ -83,32 +113,5 @@ def cul_fan_blogs():
             CreatorInfo.objects.filter(creator_id=creator).update(blog_counts=counts)
         else:
             print('计算结束')
-#
-# def cul_blog_sentiment():
-#     '''计算微博的情感'''
-#     df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
-#     key = df['key'].values.tolist()
-#     score = df['score'].values.tolist()
-#     objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
-#     # print(objs)
-#     for obj in objs:
-#         blog_content = obj.blog_content
-#         # print(blog_content)
-#         blog_id = obj.blog_id
-#         # print(blog_id)
-#         segs = jieba.lcut(blog_content, cut_all=False)  # 返回list
-#         # 计算得分
-#         score_list = [score[key.index(x)] for x in segs if (x in key)]
-#         sentiment_score = sum(score_list)
-#         if sentiment_score >30:
-#             sentiment = '积极'
-#         elif sentiment_score < -7:
-#             sentiment = '消极'
-#         else:
-#             sentiment = '中性'
-#         # print(score,sentiment)
-#         BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment,sentiment_score=sentiment_score)
-#         continue
-#     print('计算完毕')
-#
-# cul_blog_sentiment()
+
+
