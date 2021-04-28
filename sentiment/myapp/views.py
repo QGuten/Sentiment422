@@ -4,12 +4,12 @@ import jieba
 import schedule
 # from apscheduler.schedulers.background import BackgroundScheduler
 # from django_apscheduler.jobstores import DjangoJobStore
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 import time
 
-from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
+# from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
 
 sys.path.append(r'E:\Sentiment')
 
@@ -83,26 +83,32 @@ def cul_fan_blogs():
             CreatorInfo.objects.filter(creator_id=creator).update(blog_counts=counts)
         else:
             print('计算结束')
-
-def cul_blog_sentiment():
-    '''计算微博的情感'''
-    df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
-    key = df['key'].values.tolist()
-    score = df['score'].values.tolist()
-    objs = BlogInfo.objects.all()
-    for obj in objs:
-        if not obj.sentiment_score:
-            segs = jieba.lcut(obj.blog_content, cut_all=False)  # 返回list
-            # 计算得分
-            score_list = [score[key.index(x)]
-            for x in segs if (x in key)]
-            score = sum(score_list)
-            if score >30:
-                sentiment = '积极'
-            else:
-                sentiment = '消极'
-            print(score,sentiment)
-            BlogInfo.objects.filter(blog_id=obj.blog_id).update(sentiment=sentiment,sentiment_score=score)
-        else:
-            print('结束了')
-cul_blog_sentiment()
+#
+# def cul_blog_sentiment():
+#     '''计算微博的情感'''
+#     df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
+#     key = df['key'].values.tolist()
+#     score = df['score'].values.tolist()
+#     objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
+#     # print(objs)
+#     for obj in objs:
+#         blog_content = obj.blog_content
+#         # print(blog_content)
+#         blog_id = obj.blog_id
+#         # print(blog_id)
+#         segs = jieba.lcut(blog_content, cut_all=False)  # 返回list
+#         # 计算得分
+#         score_list = [score[key.index(x)] for x in segs if (x in key)]
+#         sentiment_score = sum(score_list)
+#         if sentiment_score >30:
+#             sentiment = '积极'
+#         elif sentiment_score < -7:
+#             sentiment = '消极'
+#         else:
+#             sentiment = '中性'
+#         # print(score,sentiment)
+#         BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment,sentiment_score=sentiment_score)
+#         continue
+#     print('计算完毕')
+#
+# cul_blog_sentiment()

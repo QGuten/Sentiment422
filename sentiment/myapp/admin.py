@@ -4,8 +4,6 @@ from django.utils.html import format_html
 
 from .models import *
 # Register your models here.
-
-
 admin.site.site_title = '抑郁症超话情感分析系统'
 admin.site.site_header = '抑郁症超话情感分析系统'
 admin.site.index_title = '抑郁症超话情感分析系统'
@@ -32,8 +30,6 @@ class BlogInfoAdmin(admin.ModelAdmin):
     search_fields = ['creator_nickname','creator_id']
     # 在数据新增页或修改页设置可编辑的字段
     fields = ['blog_content','creator_nickname','created_time','sentiment', 'sentiment_score']
-    # 在新增/修改页设置不可编辑的字段
-    # exclude = ['creator_nickname','creator_id']
     # 设置不显示批量操作
     actions_on_bottom = False
     actions_on_top = False
@@ -43,15 +39,11 @@ class BlogInfoAdmin(admin.ModelAdmin):
     # 禁用删除按钮
     def has_delete_permission(self, request, obj=None):
         return False
-    # def has_change_permission(self, request, obj=None):
-    #     return True
-    # def __str__(self):
-    #     return self.blog_content
 
 class CreatorInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
     list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text','blogs_by']
-    #
+    # 设置编辑页只读字段
     readonly_fields = ['creator_nickname', 'creator_id','creator_gender','blog_counts', 'creator_sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     list_display_links = []
@@ -63,23 +55,23 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     search_fields = ['creator_id','creator_nickname']
     # 在数据新增页或修改页设置可编辑的字段
     fields = ['creator_id','creator_nickname','creator_gender','blog_counts', 'creator_sentiment_score', 'remark_text']
-
     # # 在新增/修改页设置不可编辑的字段
     # exclude = ['blog_counts','creator_sentiment_score']
-    # 改变某个字段的文本框
-    formfield_overrides = {models.TextField:{'widget':Textarea(attrs={'rows':5, 'cols':20})},}
-    # 控制选择计数器隐藏
-    actions_selection_counter = False
-    # 禁用添加按钮
-    def has_add_permission(self, request):
-        return False
     # 点击保存并继续编辑取消
     save_as_continue = False
     # 从编辑页返回列表页时保存过滤条件
     preserve_filters = True
+    # 改变某个字段的文本框
+    formfield_overrides = {models.TextField:{'widget':Textarea(attrs={'rows':5, 'cols':20})},}
+    # 控制选择计数器隐藏
+    actions_selection_counter = False
+    # list_filter = ['atitle','aParent'] # 【8】列表页右侧过滤栏
+    # 禁用添加按钮
+    def has_add_permission(self, request):
+        return False
+    # 允许修改
     def has_change_permission(self, request, obj=None):
         return True
-
     # 添加自定义超链接列字段
     def blogs_by(self,obj):
         url = "http://127.0.0.1:8000/myapp/bloginfo/?q=%s"% obj.creator_nickname
@@ -98,10 +90,11 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     # blogs_by_creator.style = 'color:rainbow;'
     # blogs_by_creator.action_type = 0    #当前页面打开
     # blogs_by_creator.action_url = 'blogsByCreator'
-    # 为微博数量添加超链接
-    def blog_counts(self,obj):
-        return format_html("<a href='http://127.0.0.1:8000/myapp/bloginfo/?q={0}'>{0}</a>", obj.creator_nickname)
-    blog_counts.short_description = "ta的超话发言"
+    # # 为微博数量添加超链接
+    # def blog_counts(self,obj):
+    #     return format_html("<a href='http://127.0.0.1:8000/myapp/bloginfo/?q={0}'>{0}</a>", obj.creator_nickname)
+    # blog_counts.short_description = "ta的超话发言"
+
 # 注册的时候要把类也添加进去
 admin.site.register(BlogInfo,BlogInfoAdmin)
 admin.site.register(CreatorInfo,CreatorInfoAdmin)
