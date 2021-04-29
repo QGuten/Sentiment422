@@ -34,7 +34,7 @@ headers = {
     # 'X-Xsrf-Token': 'a08d05',
 }
 
-max_page = 1
+max_page = 70
 
 def get_page(page, since_id: str):
     params = {
@@ -54,7 +54,7 @@ def get_page(page, since_id: str):
     print(url)
     try:
         response = requests.get(url, headers=headers, verify = False)
-        print(response)
+        # print(response)
         if response.status_code == 200:
             # response = response.text
             # print(type(response))  # tuple
@@ -194,8 +194,8 @@ def parse_page(json, page: int):
             data = (blog['blog_id'], blog['creator_nickname'], blog['blog_content'], blog['creator_id'],
                     blog['created_time'])  # 是个元组,sentiment,score
 
-            print('parse_page函数中的打印data:' + str(data))
-            print('parse_page函数中的打印page:'+str(page))
+            # print('parse_page函数中的打印data:' + str(data))
+            # print('parse_page函数中的打印page:'+str(page))
             # 微博内容、微博id、微博创建者昵称 存储到csv
             # save_to_csv(data)
             db.save_data_to_mysql(data)
@@ -213,17 +213,17 @@ def parse_page(json, page: int):
 
 # if __name__ == '__main__':
 def get_supertopic():
-    since_id = ''
+    since_id = '4631063147583282'
     # since_id = '4108231562017875'
     # db.create_t_blogs()
     for page in range(1, max_page + 1):
         # print('main函数中打印的page:'+str(page))
-        print('main函数中打印的since_id:'+str(since_id))
+        # print('main函数中打印的since_id:'+str(since_id))
         json = get_page(page, since_id) # 根据获取的since_id请求新的一页
         since_id = parse_page(*json)    # 获取下一页的since_id
 
         # print(type(json)) # tuple
-        # print(since_id, *json)
+        print(page)
         # try:
         #     since_id = parse_page(*json)    # 获取下一页的since_id
         # except:

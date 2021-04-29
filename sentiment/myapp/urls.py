@@ -1,11 +1,13 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 
 from . import views
 
-app_name = 'myapp'
-
 urlpatterns = [
+    # 页面配置
     path('', admin.site.urls),
-    # path('myapp/CreatorInfo',back_to_list),
+    path('go_tp_wc_html/', views.go_tp_wc_html),
+    # 接口配置
+    path('tp_wordcloud/', views.tp_wordcloud, name="tp_wc"),  # tp:supertopic
+
 ]

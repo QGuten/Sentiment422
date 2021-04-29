@@ -39,7 +39,7 @@ class DataManager():
         insert_blogs = '''insert into blogs (blog_id, creator_nickname, blog_content, creator_id, created_time) values(%s,%s,%s,%s,%s);'''
         #, sentiment, sentiment_score ,%s,%f
         try:
-            print("准备插入数据")
+            print("准备插入blogs数据")
             self.cursor.execute(insert_blogs, data)
             self.conn.commit()
             print('插入成功')

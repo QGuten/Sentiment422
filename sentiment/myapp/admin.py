@@ -22,7 +22,7 @@ admin.site.index_title = '抑郁症超话情感分析系统'
 #定义一个类，继承admin.ModelAdmin
 class BlogInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
-    list_display = ['blog_content','creator_nickname', 'sentiment','blog_keyword']
+    list_display = ['blog_content','creator_nickname', 'sentiment_score','blog_keyword']
     readonly_fields = ['blog_content','creator_nickname', 'created_time', 'sentiment', 'sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     list_display_links = []

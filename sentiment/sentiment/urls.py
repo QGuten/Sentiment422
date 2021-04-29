@@ -14,13 +14,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 
+import myapp
 from myapp import views
+from myapp.views import *
+
+from sentiment.myapp.views import tp_wordcloud
 
 urlpatterns = [
+    # 页面配置
     path('', admin.site.urls),
     path('admin/', admin.site.urls),
-    # path('index/', views.index),
-    path('myapp/', include('myapp.urls')),
+    # 加入myapp应用的路径
+    path('myapp/', include("myapp.urls")),
+    # path('creator_woudcloud/', views.creator_wordcloud, name='creator_wc'),
+    path('to_wordcloud', tp_wordcloud),
 ]

@@ -82,9 +82,11 @@ def generate_img(word_counts, img_file):
     plt.axis("off")
     plt.show()
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
+def create_supertopic_wordcloud():
     stopword_file = './dataset/stopword.txt'
     img_file = './dataset/01.png'
     text_list= getText()
     word_counts = get_words(text_list,stopword_file)
-    generate_img(word_counts,img_file)
+    sp_wc_img = generate_img(word_counts,img_file)
+    sp_wc_img.to_file('E:\\Sentiment\\dataset\\tp_wordcloud.png')
