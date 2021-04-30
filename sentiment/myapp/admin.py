@@ -5,8 +5,10 @@ import jieba
 import jieba.analyse
 import sys
 
+import create_creator_wordcloud
 from .models import *
 # Register your models here.
+from .views import tp_wordcloud
 
 admin.site.site_title = '抑郁症超话情感分析系统'
 admin.site.site_header = '抑郁症超话情感分析系统'
@@ -22,8 +24,9 @@ admin.site.index_title = '抑郁症超话情感分析系统'
 #定义一个类，继承admin.ModelAdmin
 class BlogInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
-    list_display = ['blog_content','creator_nickname', 'sentiment_score','blog_keyword']
-    readonly_fields = ['blog_content','creator_nickname', 'created_time', 'sentiment', 'sentiment_score']
+    list_display = ['blog_content','creator_nickname','blog_keyword']
+    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','created_time')}),('其它',{'fields':('sentiment_score','sentiment')}))
+    readonly_fields = ['blog_content','creator_nickname', 'creator_id', 'created_time', 'sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     list_display_links = []
     # 设置列表页显示最大上限数据量
@@ -32,8 +35,6 @@ class BlogInfoAdmin(admin.ModelAdmin):
     list_per_page = 10
     #设置可搜索的字段
     search_fields = ['creator_nickname','creator_id']
-    # 在数据新增页或修改页设置可编辑的字段
-    fields = ['blog_content','creator_nickname','created_time','sentiment', 'sentiment_score']
     # 设置不显示批量操作
     actions_on_bottom = False
     actions_on_top = False
@@ -41,8 +42,8 @@ class BlogInfoAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
     # 禁用删除按钮
-    def has_delete_permission(self, request, obj=None):
-        return False
+    # def has_delete_permission(self, request, obj=None):
+    #     return False
     # 生成自定义列关键词
     def blog_keyword(self, obj):
         stopwords_file = 'E:\\Sentiment\\dataset\\stopword2.txt'
@@ -55,22 +56,20 @@ class BlogInfoAdmin(admin.ModelAdmin):
     blog_keyword.short_description = '关键词'
 
 class CreatorInfoAdmin(admin.ModelAdmin):
+    ''' 用户管理模型 '''
     # 要显示的列表
-    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text','blogs_by']
+    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text','blogs_by','creator_wordcloud']
     # 设置编辑页只读字段
     readonly_fields = ['creator_nickname', 'creator_id','creator_gender','blog_counts', 'creator_sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
-    list_display_links = []
+    # list_display_links = []
     # 设置列表页显示最大上限数据量
-    list_max_show_all = 100000000
+    list_max_show_all = 10000000
     # 设置每页显示数据量
     list_per_page = 10
     #设置可搜索的字段
     search_fields = ['creator_id','creator_nickname']
-    # 在数据新增页或修改页设置可编辑的字段
-    fields = ['creator_id','creator_nickname','creator_gender','blog_counts', 'creator_sentiment_score', 'remark_text']
-    # # 在新增/修改页设置不可编辑的字段
-    # exclude = ['blog_counts','creator_sentiment_score']
+    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','creator_gender')}),('超话活跃情况',{'fields':('blog_counts','creator_sentiment_score','creator_sentiment')}),('其它',{'fields':('remark_text',),}))
     # 点击保存并继续编辑取消
     save_as_continue = False
     # 从编辑页返回列表页时保存过滤条件
@@ -95,30 +94,39 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     blogs_by.allow_tags = True
     blogs_by.short_description = 'ta的发帖'
 
-    # 添加词云页面入口
-    # def creator_wordcloud(self,obj):
-    #     url = "http://127.0.0.1:8000/myapp/creatorinfo/%s"%obj.creator_id
-    #     url_text = 'ta的词云'
-    #     return format_html(u'<a href="{}" target=_blank">{}</a>'.format(url,url_text))
-    # creator_wordcloud.allow_tags = True
-    # creator_wordcloud.short_description = 'ta的词云'
+# 自定义超链接产生用户词云图，实时生成
+    def creator_wordcloud(self,obj):
+        ''' 调用生成用户词云图的程序，生成词云图，响应返回词云图 '''
+        blogs = BlogInfo.objects.filter(creator_id=obj.creator_id)
+        for blog in blogs:
+            text = '。'.join(blog.blog_content)
+        create_creator_wordcloud.create_creator_wordcloud(text)
+        url = "http://127.0.0.1:8000/myapp/creatorinfo/%s/change" % obj.creator_id
+        url_text = "ta的词云"
+        return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url, url_text))
+    creator_wordcloud.allow_tags = True
+    creator_wordcloud.short_description = 'ta的词云'
 
-    # 添加自定义按钮
-    # actions = ['blogs_by_creator']
-    # def blogs_by_creator(self, request):
-    #     return True
-    # # 自定义按钮的配置
-    # blogs_by_creator.shor_description = 'ta的发布的超话帖子'
-    # blogs_by_creator.icon = 'el-icon-video-pause'
-    # blogs_by_creator.type = 'danger'
-    # blogs_by_creator.style = 'color:rainbow;'
-    # blogs_by_creator.action_type = 0    #当前页面打开
-    # blogs_by_creator.action_url = 'blogsByCreator'
-    # # 为微博数量添加超链接
-    # def blog_counts(self,obj):
-    #     return format_html("<a href='http://127.0.0.1:8000/myapp/bloginfo/?q={0}'>{0}</a>", obj.creator_nickname)
-    # blog_counts.short_description = "ta的超话发言"
 
 # 注册的时候要把类也添加进去
 admin.site.register(BlogInfo,BlogInfoAdmin)
 admin.site.register(CreatorInfo,CreatorInfoAdmin)
+
+@admin.register(Topic_Wordcloud)
+class TopicWordcloudAdmin(admin.ModelAdmin):
+    # def changelist_view(self, request, extra_context=None):
+    #     return tp_wordcloud(request)
+
+    # 禁用添加按钮
+    def has_add_permission(self, request):
+        return False
+    # 禁用删除按钮
+    def has_delete_permission(self, request, obj=None):
+        return False
+    # 禁用修改按钮
+    def has_change_permission(self, request, obj=None):
+        return False
+    def has_view_or_change_permission(self, request, obj=None):
+        return tp_wordcloud(request)
+
+

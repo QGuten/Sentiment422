@@ -20,14 +20,11 @@ import myapp
 from myapp import views
 from myapp.views import *
 
-from sentiment.myapp.views import tp_wordcloud
-
 urlpatterns = [
     # 页面配置
-    path('', admin.site.urls),
-    path('admin/', admin.site.urls),
     # 加入myapp应用的路径
-    path('myapp/', include("myapp.urls")),
+    path('', include("myapp.urls")),
+    path('', admin.site.urls),
+
     # path('creator_woudcloud/', views.creator_wordcloud, name='creator_wc'),
-    path('to_wordcloud', tp_wordcloud),
 ]

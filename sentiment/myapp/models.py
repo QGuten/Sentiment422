@@ -36,4 +36,13 @@ class CreatorInfo(models.Model):
     def __str__(self):
         return self.creator_nickname
 
+# 虚拟模型，承载超话词云
+class Topic_Wordcloud(models.Model):
+    pass
 
+    class Meta:
+        verbose_name = '超话词云'
+        verbose_name_plural = verbose_name
+    #
+    # def __str__(self):
+    #     return self.creator_nickname
