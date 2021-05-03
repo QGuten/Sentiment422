@@ -5,6 +5,7 @@ from wordcloud import WordCloud, ImageColorGenerator
 # from cv2 import imread
 import numpy as np
 from PIL import Image
+import pymysql
 import matplotlib.pyplot as plt
 
 def getText():
@@ -35,6 +36,25 @@ def getText():
         db.rollback()
         print(e)
 
+def saveKeyword(keyword,count):
+	 # 连接数据库
+    db = pymysql.connect(host="localhost", port=3306,database="sentiment", user="root",password="newpassword", charset='utf8')
+    try:
+        # 使用cursor()方法获取操作游标
+        cursor = db.cursor()
+        print('游标建立成功,准备存储超话关键词及词频')
+        # 获取微博内容数据
+        sql = "insert into supertopic_keywords(keyword, count) values (%s,%s) on duplicate key update;"%(keyword,count)
+        cursor.execute(sql)
+        # 关闭数据库连接
+        db.close()
+        print('关闭数据库连接')
+        # 返回微博内容列表contents
+    except Exception as e:
+        print("存储关键词出错：")
+        db.rollback()
+        print(e)
+
 def get_words(text_list,stopword_file):
     text = '。'.join(text_list)
     word_counts = {}
@@ -54,7 +74,17 @@ def get_words(text_list,stopword_file):
                 word_counts[word] = 1
             else:
                 word_counts[word] = word_counts[word] + 1
-    print(word_counts)
+    # 存储词频字典
+    # try:
+    #     for item in word_counts:
+    #         tmp = item.split(' ',1)
+    #         keyword = item[0]
+    #         count = item[1]
+    #         saveKeyword(keyword, count)
+    # except Exception as e:
+    #     print(e)
+    #     pass
+    # print(word_counts)
     return word_counts
     # jieba的提取主题词方法
     # jieba.analyse.set_stop_words(stopword_file)  # file_name为自定义停用词表路径，每行一个词
@@ -70,15 +100,18 @@ def generate_img(word_counts, img_file):
         mask=background_image,
         font_path='C:\Windows\Fonts\msyh.ttc',
         collocations=False,
-        max_words=150,
+        max_words=250,
         min_font_size=5,
-        max_font_size=40
+        max_font_size=40,
+        contour_width=2,
+        contour_color ='steelblue',
+        colormap='Blues',
     )
     wc.generate_from_frequencies(word_counts)
     # 生成颜色值
-    image_color = ImageColorGenerator(background_image)
+    # image_color = ImageColorGenerator(background_image)
 
-    plt.imshow(wc.recolor(color_func=image_color), interpolation="bilinear")
+    # plt.imshow(wc.recolor(color_func=image_color), interpolation="bilinear")
     plt.axis("off")
     plt.show()
     # wc.to_file('./dataset/tp_wordcloud.png')

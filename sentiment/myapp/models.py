@@ -37,12 +37,14 @@ class CreatorInfo(models.Model):
         return self.creator_nickname
 
 # 虚拟模型，承载超话词云
-class Topic_Wordcloud(models.Model):
-    pass
-
+class TopicWord(models.Model):
+    id = models.IntegerField(primary_key=True)
+    keyword = models.CharField( max_length=10, verbose_name='超话关键词')
+    count = models.CharField(max_length=7, verbose_name='超话关键词词频')
     class Meta:
-        verbose_name = '超话词云'
+        verbose_name = '超话关键词'
         verbose_name_plural = verbose_name
-    #
-    # def __str__(self):
-    #     return self.creator_nickname
+        db_table = 'topic_keywords'
+
+    def __str__(self):
+        return self.keyword

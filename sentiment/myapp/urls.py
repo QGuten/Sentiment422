@@ -7,6 +7,6 @@ urlpatterns = [
     # 页面配置
     # path('go_tp_wc_html/', views.go_tp_wc_html),
     # 接口配置
-    # path('topic_wordcloud/'),  # tp:supertopic
+    path('myapp/topicword/', views.tp_wordcloud),  # tp:supertopic
 
 ]

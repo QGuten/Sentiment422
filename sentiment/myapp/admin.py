@@ -8,7 +8,6 @@ import sys
 import create_creator_wordcloud
 from .models import *
 # Register your models here.
-from .views import tp_wordcloud
 
 admin.site.site_title = '抑郁症超话情感分析系统'
 admin.site.site_header = '抑郁症超话情感分析系统'
@@ -58,7 +57,7 @@ class BlogInfoAdmin(admin.ModelAdmin):
 class CreatorInfoAdmin(admin.ModelAdmin):
     ''' 用户管理模型 '''
     # 要显示的列表
-    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text','blogs_by','creator_wordcloud']
+    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text',] # 'blogs_by',,'creator_wordcloud'
     # 设置编辑页只读字段
     readonly_fields = ['creator_nickname', 'creator_id','creator_gender','blog_counts', 'creator_sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
@@ -89,44 +88,43 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     # 添加自定义超链接列字段
     def blogs_by(self,obj):
         url = "http://127.0.0.1:8000/myapp/bloginfo/?q=%s"% obj.creator_nickname
-        url_text = "ta的发帖"
+        url_text = "hisPost"
         return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url,url_text))
     blogs_by.allow_tags = True
-    blogs_by.short_description = 'ta的发帖'
+    blogs_by.short_description = 'hisPost'
 
-# 自定义超链接产生用户词云图，实时生成
-    def creator_wordcloud(self,obj):
-        ''' 调用生成用户词云图的程序，生成词云图，响应返回词云图 '''
-        blogs = BlogInfo.objects.filter(creator_id=obj.creator_id)
-        for blog in blogs:
-            text = '。'.join(blog.blog_content)
-        create_creator_wordcloud.create_creator_wordcloud(text)
-        url = "http://127.0.0.1:8000/myapp/creatorinfo/%s/change" % obj.creator_id
-        url_text = "ta的词云"
-        return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url, url_text))
-    creator_wordcloud.allow_tags = True
-    creator_wordcloud.short_description = 'ta的词云'
+# # 自定义超链接产生用户词云图，实时生成
+#     def creator_wordcloud(self,obj):
+#         ''' 调用生成用户词云图的程序，生成词云图，响应返回词云图 '''
+#         blogs = BlogInfo.objects.filter(creator_id=obj.creator_id)
+#         for blog in blogs:
+#             text = '。'.join(blog.blog_content)
+#         create_creator_wordcloud.create_creator_wordcloud(text)
+#         url = "http://127.0.0.1:8000/myapp/creatorinfo/%s/change" % obj.creator_id
+#         url_text = "ta的词云"
+#         return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url, url_text))
+#     creator_wordcloud.allow_tags = True
+#     creator_wordcloud.short_description = 'ta的词云'
 
 
 # 注册的时候要把类也添加进去
 admin.site.register(BlogInfo,BlogInfoAdmin)
 admin.site.register(CreatorInfo,CreatorInfoAdmin)
 
-@admin.register(Topic_Wordcloud)
-class TopicWordcloudAdmin(admin.ModelAdmin):
-    # def changelist_view(self, request, extra_context=None):
-    #     return tp_wordcloud(request)
-
-    # 禁用添加按钮
+@admin.register(TopicWord)
+class TopicWordAdmin(admin.ModelAdmin):
+    # 要显示的列表
+    list_display = ['keyword','count',]
+    list_display_links = None
+    list_max_show_all = 10000000
+    list_per_page = 10
+    search_fields = ['keyword',]
     def has_add_permission(self, request):
         return False
-    # 禁用删除按钮
+
     def has_delete_permission(self, request, obj=None):
         return False
-    # 禁用修改按钮
+
     def has_change_permission(self, request, obj=None):
         return False
-    def has_view_or_change_permission(self, request, obj=None):
-        return tp_wordcloud(request)
-
 

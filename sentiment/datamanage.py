@@ -70,7 +70,7 @@ class DataManager():
             print("准备插入超话粉丝数据")
             self.cursor.execute(insert_sql_fans, data)
             self.conn.commit()
-            print('插入超话粉丝数据成功')
+            print('插入fans数据成功')
         except Exception as e:
             # 错误时回滚
             print('插入失败，具体见数据库报错')

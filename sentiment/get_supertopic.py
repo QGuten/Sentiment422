@@ -34,7 +34,7 @@ headers = {
     # 'X-Xsrf-Token': 'a08d05',
 }
 
-max_page = 4
+max_page =10
 
 def get_page(page, since_id: str):
     params = {
@@ -93,14 +93,6 @@ def save_to_csv(resource_data):
         print("写入成功\n")
     except UnicodeEncodeError:
         print("编码错误，数据转换失败，无法写入。")
-
-def clean_content(text):
-    str = re.sub('[a-zA-Z0-9’!"#$%&\'()*+,-./:;<=>?@，。?★、…【】《》？“”‘’！[\\]^_`{|}~\s]+', "", text)
-    # 去除不可见字符
-    str = re.sub(
-        '[\001\002\003\004\005\006\007\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a]+','',text)
-    return str
-
 
 def get_score(text):
     df = pd.read_table(r"dataset\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
@@ -197,11 +189,11 @@ def parse_page(json, page: int):
 
             # 休息间隔再获取下一个item，防止封禁
             # time.sleep(random.uniform(2,4))
-        return since_id  # yield表示返回值则表示该函数是个生成器。
+        return since_id
 
 # if __name__ == '__main__':
 def get_supertopic():
-    since_id = '4060120363595201'
+    since_id = ''
     # since_id = '4108231562017875'
     # db.create_t_blogs()
     for page in range(1, max_page + 1):
