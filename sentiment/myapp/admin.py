@@ -4,8 +4,10 @@ from django.utils.html import format_html
 import jieba
 import jieba.analyse
 import sys
+import pandas as pd
 
 import create_creator_wordcloud
+from .forms import CreatorInfoAdminForm
 from .models import *
 # Register your models here.
 
@@ -56,10 +58,11 @@ class BlogInfoAdmin(admin.ModelAdmin):
 
 class CreatorInfoAdmin(admin.ModelAdmin):
     ''' 用户管理模型 '''
+    form = CreatorInfoAdminForm
     # 要显示的列表
-    list_display = ['creator_nickname','creator_gender', 'blog_counts','remark_text',] # 'blogs_by',,'creator_wordcloud'
+    list_display = ['creator_nickname', 'gender','blog_counts','remark_text','blogs_by',] # ,,'creator_wordcloud'
     # 设置编辑页只读字段
-    readonly_fields = ['creator_nickname', 'creator_id','creator_gender','blog_counts', 'creator_sentiment_score']
+    readonly_fields = ['creator_nickname', 'creator_id','gender','blog_counts', 'creator_sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     # list_display_links = []
     # 设置列表页显示最大上限数据量
@@ -68,7 +71,7 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     list_per_page = 10
     #设置可搜索的字段
     search_fields = ['creator_id','creator_nickname']
-    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','creator_gender')}),('超话活跃情况',{'fields':('blog_counts','creator_sentiment_score','creator_sentiment')}),('其它',{'fields':('remark_text',),}))
+    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','gender')}),('超话活跃情况',{'fields':('blog_counts','creator_sentiment_score','creator_sentiment')}),('其它',{'fields':('remark_text',),}))
     # 点击保存并继续编辑取消
     save_as_continue = False
     # 从编辑页返回列表页时保存过滤条件
@@ -88,23 +91,36 @@ class CreatorInfoAdmin(admin.ModelAdmin):
     # 添加自定义超链接列字段
     def blogs_by(self,obj):
         url = "http://127.0.0.1:8000/myapp/bloginfo/?q=%s"% obj.creator_nickname
-        url_text = "hisPost"
+        url_text = "ta的发言"
         return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url,url_text))
-    blogs_by.allow_tags = True
-    blogs_by.short_description = 'hisPost'
+    # blogs_by.allow_tags = True
+    blogs_by.short_description = 'ta的发言'
+
+    # 性别转换中文
+    def gender(self,obj):
+        g = obj.creator_gender
+        if g=='f':
+            gender='女';
+        else:
+            gender = '男';
+        return gender
+    gender.short_description = '用户性别'
 
 # # 自定义超链接产生用户词云图，实时生成
-#     def creator_wordcloud(self,obj):
-#         ''' 调用生成用户词云图的程序，生成词云图，响应返回词云图 '''
-#         blogs = BlogInfo.objects.filter(creator_id=obj.creator_id)
-#         for blog in blogs:
-#             text = '。'.join(blog.blog_content)
-#         create_creator_wordcloud.create_creator_wordcloud(text)
-#         url = "http://127.0.0.1:8000/myapp/creatorinfo/%s/change" % obj.creator_id
-#         url_text = "ta的词云"
-#         return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url, url_text))
-#     creator_wordcloud.allow_tags = True
-#     creator_wordcloud.short_description = 'ta的词云'
+    def creator_wordcloud(self,obj):
+        ''' 调用生成用户词云图的程序，生成词云图，响应返回词云图 '''
+        blogs = BlogInfo.objects.filter(creator_id=obj.creator_id)
+        for blog in blogs:
+            text = '。'.join(blog.blog_content)
+        create_creator_wordcloud.create_creator_wordcloud(text)
+        # url = "http://127.0.0.1:8000/myapp/creatorinfo/%s/change" % obj.creator_id
+        # url_text = "ta的词云"
+        # return format_html(u'<a href="{}" target="_blank">{}</a>'.format(url, url_text))
+        return true
+    creator_wordcloud.icon = 'el-icon-video-pause'
+    creator_wordcloud.type = 'danger'
+    creator_wordcloud.style = 'color:rainbow;'
+    creator_wordcloud.short_description = 'ta的词云'
 
 
 # 注册的时候要把类也添加进去
@@ -128,3 +144,14 @@ class TopicWordAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+
+class CustomTextAdmin(admin.ModelAdmin):
+    # 要显示的列表
+    list_display = ['custom_content','text_sentiment',]
+    list_display_links = ['custom_content']
+    list_max_show_all = 10000000
+    list_per_page = 10
+    search_fields = ['custom_content','text_sentiment']
+    readonly_fields = ['text_sentiment_score']
+
+admin.site.register(CustomText,CustomTextAdmin)

@@ -9,9 +9,12 @@ import re
 import pandas as pd
 import decimal
 import jsonpath
+import urllib3
 
 from datamanage import DataManager
 
+# 移除https的SSL认证警告
+requests.packages.urllib3.disable_warnings()
 # 实例化数据库对象
 db = DataManager()
 
@@ -26,11 +29,13 @@ base_url = 'https://m.weibo.cn/api/container/getIndex?'
 headers = {
     'Host': 'm.weibo.cn',
     'method': 'GET',
+    'scheme': 'https',
+    'accept': 'application/json, text/plain, */*',
     'Accept-Language': 'zh-CN,zh;q=0.9',
     'accept-encoding': 'gzip, deflate, br',
     'cookie': 'SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhD2inmZvEY9N-ZNkH52FmA5NHD95QcS0qfS02p1h24Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoMcSKMpeKnp1Btt; SUB=_2A25NS2XoDeRhGeBJ7VcW8S_EyjWIHXVutAugrDV6PUJbktAfLVnykW1NRinJWjp3NXZmmLtKIAOPjHDJB-LZA8fo; SSOLoginState=1615795640; MLOGIN=1; WEIBOCN_FROM=1110103030; _T_WM=93057680546; XSRF-TOKEN=ba3044; M_WEIBOCN_PARAMS=luicode%3D10000011%26lfid%3D100103type%253D98%2526q%253D%25E6%258A%2591%25E9%2583%2581%25E7%2597%2587%2526t%253D0%26featurecode%3D10000326%26oid%3D4594832997101078%26fid%3D100808f86f9e10c1d3bdefe430d95f95388c90_-_feed%26uicode%3D10000011',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
-    'X-Requested-With': 'XMLHttpRequest',
+    # 'X-Requested-With': 'XMLHttpRequest',
     # 'X-Xsrf-Token': 'a08d05',
 }
 
@@ -41,7 +46,7 @@ def get_page(page, since_id: str):
         'extparam': '%E6%8A%91%E9%83%81%E7%97%87',
         'containerid': '100808f86f9e10c1d3bdefe430d95f95388c90',
         'luicode': '10000011',
-        # 'page': page,
+        'page': page,
         'lfid': '100103type%3D98%26q%3D%E6%8A%91%E9%83%81%E7%97%87%26t%3D0',
         'since_id': since_id
     }
@@ -123,11 +128,9 @@ def parse_page(json, page: int):
     while json:
         try:
             since_id = json.get('data').get('pageInfo').get('since_id')
-        # print('parse_page函数内部的打印:'+(page, since_id))
+            print('parse_page函数内部的打印:'+(page, since_id))
         except:
-            print('没有since_id了。回到超话下最新的内容开始获取。')
-            since_id = ''
-            break
+            print('go on ')
 
         items = json.get('data').get('cards')   # cards是个列表
         # print(type(items))  # cards是个list
@@ -193,20 +196,14 @@ def parse_page(json, page: int):
 
 # if __name__ == '__main__':
 def get_supertopic():
+#     since_id = ''
     since_id = ''
-    # since_id = '4108231562017875'
     # db.create_t_blogs()
     for page in range(1, max_page + 1):
         # print('main函数中打印的page:'+str(page))
         # print('main函数中打印的since_id:'+str(since_id))
         json = get_page(page, since_id) # 根据获取的since_id请求新的一页
         since_id = parse_page(*json)    # 获取下一页的since_id
-
         # print(type(json)) # tuple
         print(page)
-        # try:
-        #     since_id = parse_page(*json)    # 获取下一页的since_id
-        # except:
-        #     since_id=''
-        #     pass
         time.sleep(random.uniform(4,10))

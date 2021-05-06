@@ -1,40 +1,39 @@
 import jieba
 import jieba.analyse
-import pymysql
+import time
 from wordcloud import WordCloud, ImageColorGenerator
-# from cv2 import imread
 import numpy as np
 from PIL import Image
 import pymysql
 import matplotlib.pyplot as plt
 
-def getText():
-	 # 连接数据库
-    db = pymysql.connect(host="localhost", port=3306,database="sentiment", user="root",password="newpassword", charset='utf8')
-    try:
-        # 使用cursor()方法获取操作游标
-        cursor = db.cursor()
-        print('游标建立成功')
-        # 获取微博内容数据
-        sql = "select blog_content from blogs;"
-        cursor.execute(sql)
-        # 直接通过数据库查询获取的是((1,张三,男),(2,李四,女))这样的元组格式：
-        # 每条记录通过元组记录属性值，同时每条记录作为一个元组元素组成查询结果元组
-        results = cursor.fetchall()
-        # 将微博内容放入contents列表
-        contents = []
-        for re in results:
-        	#只取了text属性值，可直接extend
-            contents.extend(re)
-        # 关闭数据库连接
-        db.close()
-        print('关闭数据库连接')
-        # 返回微博内容列表contents
-        return contents
-    except Exception as e:
-        print("出错：")
-        db.rollback()
-        print(e)
+# def getText():
+# 	 # 连接数据库
+#     db = pymysql.connect(host="localhost", port=3306,database="sentiment", user="root",password="newpassword", charset='utf8')
+#     try:
+#         # 使用cursor()方法获取操作游标
+#         cursor = db.cursor()
+#         print('游标建立成功')
+#         # 获取微博内容数据
+#         sql = "select blog_content from blogs;"
+#         cursor.execute(sql)
+#         # 直接通过数据库查询获取的是((1,张三,男),(2,李四,女))这样的元组格式：
+#         # 每条记录通过元组记录属性值，同时每条记录作为一个元组元素组成查询结果元组
+#         results = cursor.fetchall()
+#         # 将微博内容放入contents列表
+#         contents = []
+#         for re in results:
+#         	#只取了text属性值，可直接extend
+#             contents.extend(re)
+#         # 关闭数据库连接
+#         db.close()
+#         print('关闭数据库连接')
+#         # 返回微博内容列表contents
+#         return contents
+#     except Exception as e:
+#         print("出错：")
+#         db.rollback()
+#         print(e)
 
 def saveKeyword(keyword,count):
 	 # 连接数据库
@@ -57,6 +56,7 @@ def saveKeyword(keyword,count):
 
 def get_words(text_list,stopword_file):
     text = '。'.join(text_list)
+    # text = text.encode("gbk","ignore")
     word_counts = {}
     stop = []
     # 停用词表
@@ -66,7 +66,7 @@ def get_words(text_list,stopword_file):
             lline = line.strip()
             stop.append(lline)
     # 文本分词
-    words = jieba.lcut(text)
+    words = jieba.lcut(text,cut_all=False)
     # 计算词频
     for word in words:
         if word not in stop:
@@ -100,28 +100,24 @@ def generate_img(word_counts, img_file):
         mask=background_image,
         font_path='C:\Windows\Fonts\msyh.ttc',
         collocations=False,
-        max_words=250,
+        max_words=200,
         min_font_size=5,
         max_font_size=40,
         contour_width=2,
         contour_color ='steelblue',
-        colormap='Blues',
     )
     wc.generate_from_frequencies(word_counts)
-    # 生成颜色值
-    # image_color = ImageColorGenerator(background_image)
-
-    # plt.imshow(wc.recolor(color_func=image_color), interpolation="bilinear")
+    plt.imshow(wc)
     plt.axis("off")
     plt.show()
-    # wc.to_file('./dataset/tp_wordcloud.png')
+    wc.to_file('./dataset/tp_wordcloud.png')
     print('超话词云图生成完成。')
 
 # if __name__ == '__main__':
-def create_supertopic_wordcloud():
+def create_supertopic_wordcloud(text_list):
     stopword_file = './dataset/stopword.txt'
     img_file = './dataset/01.png'
-    text_list= getText()
+    # text_list= getText()
     word_counts = get_words(text_list,stopword_file)
     generate_img(word_counts,img_file)
 

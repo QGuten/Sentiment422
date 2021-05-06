@@ -11,7 +11,7 @@ from django.db.models import Avg
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import BlogInfo
+from .models import BlogInfo, CustomText
 from .models import CreatorInfo
 import create_creator_wordcloud
 import get_supertopic
@@ -27,21 +27,21 @@ try:
 
     # 定时任务1，爬取微博抑郁症超话内容,固定时间执行
     #装饰器的方式创建任务
-    @register_job(scheduler, "interval", hours=2, id='get_data',replace_existing=True)
-    def get_data():
-        time.sleep(2)
-        get_supertopic.get_supertopic()
+    # @register_job(scheduler, "interval", hours=5, id='获取超话信息',replace_existing=True)
+    # def get_data():
+    #     time.sleep(2)
+    #     get_supertopic.get_supertopic()
 
 
     # 定时任务2，间隔性任务，计算还未计算过情感的微博的情感
-    @register_job(scheduler, "interval", minutes=30, id='get_blog_sentiment', replace_existing=True)
-    def get_blog_sentiment():
-        cul_blog_sentiment()
+    # @register_job(scheduler, "interval", minutes=30, id='计算微博情感', replace_existing=True)
+    # def get_blog_sentiment():
+    #     cul_blog_sentiment()
 
     # 定时任务3，更新超话用户帖子数目及个人情感
-    @register_job(scheduler, "cron", hour=14,minute=16,id='get_creator_sentiment', replace_existing=True)
-    def get_creator_sentiment():
-        cul_creator_sentiment()
+    # @register_job(scheduler, "cron", hour=14,minute=16,id='计算用户情感及统计超话个人发言次数', replace_existing=True)
+    # def get_creator_sentiment():
+    #     cul_creator_sentiment()
 
     # 监控任务
     register_events(scheduler)
@@ -52,7 +52,7 @@ except Exception as e:
     scheduler.shutdown()
     pass
 
-# 计算微博情感值
+# 计算微博分值
 def cul_blog_sentiment():
     '''计算微博的情感'''
     df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
@@ -61,7 +61,7 @@ def cul_blog_sentiment():
     objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
     for obj in objs:
         blog_content = obj.blog_content
-        # print(blog_content)
+        # print(blog_content)l
         blog_id = obj.blog_id
         # print(blog_id)
         segs = jieba.lcut(blog_content, cut_all=False)  # 返回list，计算得分
@@ -78,6 +78,32 @@ def cul_blog_sentiment():
         continue
     print('微博情感计算完毕')
 # cul_blog_sentiment()
+
+# 分析微博情感
+def extract_blog_sentiment():
+    '''提取关键情感词'''
+    df = pd.read_table("E:\\Sentiment\\dataset\\负面情感词语（中文）.txt", sep='\n', header=None, encoding='gbk')
+    df.columns=['key']
+    keys = df['key'].values.tolist()
+    print(keys)
+    objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
+    for obj in objs:
+        blog_content = obj.blog_content
+        blog_id = obj.blog_id
+        # print(blog_id)
+        segs = jieba.lcut(blog_content, cut_all=False)  # 返回list，计算得分
+        # key_list = [key.index(x)for x in segs if (x in key)]
+        for x in segs:
+            # print(x)
+            if x in keys:
+                sentiment = x
+            else:
+                sentiment = '中性'
+            # print(sentiment)
+        # print(score,sentiment)
+            BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment)
+    print('微博情感提取完毕')
+# extract_blog_sentiment()
 
 def cul_creator_sentiment():
     ''' 计算用户贴子数 & 计算超话用户情感 '''
@@ -113,9 +139,33 @@ def cul_creator_sentiment():
 
 def tp_wordcloud(request):
     ''' 调用生成超话词云图的程序，生成词云图，响应返回词云图 '''
-    create_supertopic_wordcloud.create_supertopic_wordcloud()
+    text_list = BlogInfo.objects.values_list('blog_content', flat=True)
+    create_supertopic_wordcloud.create_supertopic_wordcloud(text_list)
     # imagepath = './dataset/tp_wordcloud.png'
     # tp_wc_img = open(imagepath,'rb').read()
-    return redirect('myapp/bloginfo')
+    return redirect('http://127.0.0.1:8000/myapp/bloginfo/')
 
+def cul_text_sentiment(request):
+    '''计算自定义输入内容的情感'''
+    df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
+    key = df['key'].values.tolist()
+    score = df['score'].values.tolist()
+    objs = CustomText.objects.filter(text_sentiment_score__isnull=True)
+    for obj in objs:
+        custom_text = obj.custom_text
+        id = obj.id
+        # print(blog_id)
+        segs = jieba.lcut(custom_text, cut_all=False)  # 返回list，计算得分
+        score_list = [key.index(x) for x in segs if (x in key)]
+        sentiment_score = sum(score_list)
+        if sentiment_score > 30:
+            sentiment = '积极'
+        elif sentiment_score < 0.4:
+            sentiment = '消极'
+        else:
+            sentiment = '中性'
+        # print(score,sentiment)
+        CustomText.objects.filter(id=id).update(text_sentiment=sentiment, text_sentiment_score=sentiment_score)
+    print('自定义输入内容情感计算完毕')
+    return render(request,'myapp/custom_text.html')
 
