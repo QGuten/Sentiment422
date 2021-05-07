@@ -13,18 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib import staticfiles
 from django.contrib import admin
 from django.urls import path, include, re_path
-
 import myapp
 from myapp import views
 from myapp.views import *
 
+app_name='myapp'
 urlpatterns = [
     # 页面配置
     # 加入myapp应用的路径
-    path('', include("myapp.urls")),
+    path('', include(("myapp.urls", 'myapp'))),
     path('', admin.site.urls),
 
     # path('creator_woudcloud/', views.creator_wordcloud, name='creator_wc'),
 ]
+
+# 设置静态文件路径
+urlpatterns += staticfiles_urlpatterns()

@@ -8,6 +8,6 @@ urlpatterns = [
     # path('go_tp_wc_html/', views.go_tp_wc_html),
     # 接口配置
     path('myapp/topicword/', views.tp_wordcloud),  # tp:supertopic
-    path('myapp/customtext/', views.cul_text_sentiment),
+    path('myapp/customtext/', views.cul_text_sentiment,name='cul_text_sentiment'),
 
 ]

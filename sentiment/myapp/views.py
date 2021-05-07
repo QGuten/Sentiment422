@@ -1,4 +1,5 @@
 import _thread
+import json
 import sys
 import threading
 import time
@@ -145,27 +146,32 @@ def tp_wordcloud(request):
     # tp_wc_img = open(imagepath,'rb').read()
     return redirect('http://127.0.0.1:8000/myapp/bloginfo/')
 
+sentiment='未知'
+sentiment_score=0
 def cul_text_sentiment(request):
     '''计算自定义输入内容的情感'''
+    global sentiment
+    global sentiment_score
     df = pd.read_table("E:\\Sentiment\\dataset\\BosonNLP_sentiment_score.txt", sep=" ", names=['key', 'score'])
     key = df['key'].values.tolist()
     score = df['score'].values.tolist()
-    objs = CustomText.objects.filter(text_sentiment_score__isnull=True)
-    for obj in objs:
-        custom_text = obj.custom_text
-        id = obj.id
-        # print(blog_id)
-        segs = jieba.lcut(custom_text, cut_all=False)  # 返回list，计算得分
-        score_list = [key.index(x) for x in segs if (x in key)]
+    if request.method == 'POST':
+        customtext = request.POST.get('customtext')
+        segs = jieba.lcut(customtext, cut_all=False)  # 返回list，计算得分
+        score_list = [score[key.index(x)] for x in segs if (x in key)]
+        print(score_list)
         sentiment_score = sum(score_list)
-        if sentiment_score > 30:
+        if sentiment_score > 3:
             sentiment = '积极'
         elif sentiment_score < 0.4:
             sentiment = '消极'
         else:
             sentiment = '中性'
-        # print(score,sentiment)
-        CustomText.objects.filter(id=id).update(text_sentiment=sentiment, text_sentiment_score=sentiment_score)
-    print('自定义输入内容情感计算完毕')
-    return render(request,'myapp/custom_text.html')
+        data = {'sentiment':sentiment,'sentiment_score':sentiment_score}
+        json_data = json.dumps(data)
+        # print('计算完毕')
+        print('结果为：%s,%s'%(sentiment_score,sentiment))
+        return render(request, 'myapp/custom_text.html', {'sentiment': sentiment, 'sentiment_score': sentiment_score})
+    return render(request, 'myapp/custom_text.html',{'sentiment':sentiment,'sentiment_score':sentiment_score})
+
 

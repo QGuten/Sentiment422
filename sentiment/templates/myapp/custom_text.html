@@ -1,10 +1,28 @@
-{% extends "admin/index.html" %}
+{% extends "admin/base_site.html" %}
 {% load static %}
 {% block content%}
-    <div><strong>情感计算</strong></div>
-    <div>
-    <form>
-            <input style="text-align: left" name="text" placeholder="请输入......">
-    </form>
-    </div>
+   <div class="ai-module-demo-container" style="margin-top:60px;margin-left: 500px;margin-right: 500px;">
+       <div class="tech-recognition" style="display: block;margin-top: 1px;margin-bottom: 20px;">
+           <div class="ai-container" style="display: block">
+               <div class="feel" style="width: 1000px; margin-right:auto;margin-left: auto;font-family: 'Microsoft YaHei UI'">
+                   <div class="mid-down-title" style="margin-bottom: 2px;margin-top: 2px;">
+                       <span class="down-title-des" style="font-size:30px;color: #570808;margin-top: 0px;margin-bottom: 0px;">请输入一段想分析的文本：</span>
+                   </div>
+                    <div class="mid-form-cover" style="position: relative">
+                        <form method="post" action="{% url 'myapp:cul_text_sentiment' %}">
+                            {% csrf_token %}
+                        <input type="textarea" spellcheck="false" class="com-txt" name="customtext" value="{{ customtext }}" placeholder="请输入......" style="width: 700px;height:200px;font-size:15px;text-rendering: auto;letter-spacing:normal;word-spacing: normal;text-indent: 1px;text-align: start;appearance: auto;flex-direction: column;cursor: text;white-space: pre-wrap;overflow-wrap: break-word;margin-bottom: 2px;margin-top: 2em;"><br>
+                        <input type="submit" value="确认" style="margin-top: 12px; margin-bottom: 6px; width: 170px;height: 40px;font-size: medium"> <br>
+                        </form>
+                    </div>
+                    <div class="de-add-comment" style="margin-top: 2px">
+                       <span class="comment-left" style="font-size:30px;font-weight: bold;">分 析 结 果：</span><br> <!---->
+                        <span style="margin-top: 12px;margin-bottom: 30px;"><label style="font-size: medium">  </t>  情感倾向：{{ sentiment }}</label></span><br>
+                        <span><label style="font-size: medium">波森情感分值结果：{{ sentiment_score }}</label></span>
+                    </div>
+
+                </div>
+           </div>
+       </div>>
+   </div>
 {% endblock %}

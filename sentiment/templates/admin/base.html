@@ -20,7 +20,7 @@
 </head>
 {% load i18n %}
 
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+<body style="background-image: url({% static 'admin/img/hnnd.jpg' %});background-size: 100% 100%;background-repeat: no-repeat;" class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
   data-admin-utc-offset="{% now "Z" %}">
 
 <!-- Container -->
