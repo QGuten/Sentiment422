@@ -26,23 +26,23 @@ try:
     scheduler = BackgroundScheduler(job_defaults=job_defaults)
     scheduler.add_jobstore(DjangoJobStore(), 'default')
 
-    # 定时任务1，爬取微博抑郁症超话内容,固定时间执行
-    # 装饰器的方式创建任务
-    @register_job(scheduler, "interval", hours=5, id='获取超话信息',replace_existing=True)
-    def get_data():
-        time.sleep(2)
-        get_supertopic.get_supertopic()
+    # # 定时任务1，爬取微博抑郁症超话内容,固定时间执行
+    # # 装饰器的方式创建任务
+    # @register_job(scheduler, "interval", hours=20, id='获取超话信息',replace_existing=True)
+    # def get_data():
+    #     time.sleep(2)
+    #     get_supertopic.get_supertopic()
 
 
-    # 定时任务2，间隔性任务，计算还未计算过情感的微博的情感
-    @register_job(scheduler, "interval", minutes=30, id='计算微博情感', replace_existing=True)
-    def get_blog_sentiment():
-        cul_blog_sentiment()
+    # # 定时任务2，间隔性任务，计算还未计算过情感的微博的情感
+    # @register_job(scheduler, "interval", minutes=50, id='计算微博情感', replace_existing=True)
+    # def get_blog_sentiment():
+    #     cul_blog_sentiment()
 
-    # 定时任务3，更新超话用户帖子数目及个人情感
-    @register_job(scheduler, "cron", hour=14,minute=16,id='计算用户情感及统计超话个人发言次数', replace_existing=True)
-    def get_creator_sentiment():
-        cul_creator_sentiment()
+    # # 定时任务3，更新超话用户帖子数目及个人情感
+    # @register_job(scheduler, "cron", hour=20,minute=30,id='计算用户情感及统计超话个人发言次数', replace_existing=True)
+    # def get_creator_sentiment():
+    #     cul_creator_sentiment()
 
     # 监控任务
     register_events(scheduler)
@@ -86,8 +86,10 @@ def extract_blog_sentiment():
     df = pd.read_table("E:\\Sentiment\\dataset\\负面情感词语（中文）.txt", sep='\n', header=None, encoding='gbk')
     df.columns=['key']
     keys = df['key'].values.tolist()
+    for i in range(len(keys)):
+        keys[i] = keys[i].replace(' ','')
     print(keys)
-    objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
+    objs = BlogInfo.objects.filter(sentiment='中性')
     for obj in objs:
         blog_content = obj.blog_content
         blog_id = obj.blog_id
@@ -95,16 +97,16 @@ def extract_blog_sentiment():
         segs = jieba.lcut(blog_content, cut_all=False)  # 返回list，计算得分
         # key_list = [key.index(x)for x in segs if (x in key)]
         for x in segs:
-            # print(x)
+            print(x)
             if x in keys:
                 sentiment = x
             else:
                 sentiment = '中性'
-            # print(sentiment)
+            print(sentiment)
         # print(score,sentiment)
             BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment)
     print('微博情感提取完毕')
-# extract_blog_sentiment()
+extract_blog_sentiment()
 
 def cul_creator_sentiment():
     ''' 计算用户贴子数 & 计算超话用户情感 '''
