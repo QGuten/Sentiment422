@@ -97,7 +97,8 @@ form ul.inline li {
 }
 
 .colMS .aligned .vLargeTextField, .colMS .aligned .vXMLLargeTextField {
-    width: 350px;
+    width: 300px;
+    height: 100px;
 }
 
 form .aligned ul {

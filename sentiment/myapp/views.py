@@ -27,22 +27,22 @@ try:
     scheduler.add_jobstore(DjangoJobStore(), 'default')
 
     # 定时任务1，爬取微博抑郁症超话内容,固定时间执行
-    #装饰器的方式创建任务
-    # @register_job(scheduler, "interval", hours=5, id='获取超话信息',replace_existing=True)
-    # def get_data():
-    #     time.sleep(2)
-    #     get_supertopic.get_supertopic()
+    # 装饰器的方式创建任务
+    @register_job(scheduler, "interval", hours=5, id='获取超话信息',replace_existing=True)
+    def get_data():
+        time.sleep(2)
+        get_supertopic.get_supertopic()
 
 
     # 定时任务2，间隔性任务，计算还未计算过情感的微博的情感
-    # @register_job(scheduler, "interval", minutes=30, id='计算微博情感', replace_existing=True)
-    # def get_blog_sentiment():
-    #     cul_blog_sentiment()
+    @register_job(scheduler, "interval", minutes=30, id='计算微博情感', replace_existing=True)
+    def get_blog_sentiment():
+        cul_blog_sentiment()
 
     # 定时任务3，更新超话用户帖子数目及个人情感
-    # @register_job(scheduler, "cron", hour=14,minute=16,id='计算用户情感及统计超话个人发言次数', replace_existing=True)
-    # def get_creator_sentiment():
-    #     cul_creator_sentiment()
+    @register_job(scheduler, "cron", hour=14,minute=16,id='计算用户情感及统计超话个人发言次数', replace_existing=True)
+    def get_creator_sentiment():
+        cul_creator_sentiment()
 
     # 监控任务
     register_events(scheduler)

@@ -26,7 +26,7 @@ admin.site.index_title = '抑郁症超话情感分析系统'
 class BlogInfoAdmin(admin.ModelAdmin):
     # 要显示的列表
     list_display = ['blog_content','creator_nickname','blog_keyword']
-    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','created_time')}),('其它',{'fields':('sentiment_score','sentiment')}))
+    fieldsets = (('基本信息', {'fields':('blog_content','creator_id','creator_nickname','created_time')}),('其它',{'fields':('sentiment_score','sentiment')}))
     readonly_fields = ['blog_content','creator_nickname', 'creator_id', 'created_time', 'sentiment_score']
     # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     list_display_links = []
@@ -153,5 +153,8 @@ class CustomTextAdmin(admin.ModelAdmin):
     list_per_page = 10
     search_fields = ['custom_content','text_sentiment']
     readonly_fields = ['text_sentiment_score']
+
+    def has_add_permission(self, request):
+        return False
 
 admin.site.register(CustomText,CustomTextAdmin)

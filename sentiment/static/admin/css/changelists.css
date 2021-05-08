@@ -9,10 +9,23 @@
 #changelist .changelist-form-container {
     flex: 1 1 auto;
     min-width: 0;
+    max-width: 100%;
 }
 
 #changelist table {
     width: 100%;
+    font-size: medium;
+    table-layout: auto;
+}
+
+#changelist table td {
+    font-size: 14px;
+    width: auto;
+}
+
+#changelist table th {
+    font-size: 14px;
+    width: 75%;
 }
 
 .change-list .hiddenfields { display:none; }
@@ -32,6 +45,9 @@
 
 .change-list .filtered table tbody th {
     padding-right: 1em;
+    padding: 3px 7px 3px 7px;
+    font-size: 1.2em;
+    line-height: normal;
 }
 
 #changelist-form .results {
