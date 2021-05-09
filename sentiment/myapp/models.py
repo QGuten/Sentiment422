@@ -11,7 +11,7 @@ class BlogInfo(models.Model):
     sentiment_score = models.FloatField(blank=True, null=True,verbose_name='微博情感分值')
 
     class Meta:
-        verbose_name = '超话帖子'
+        verbose_name = '抑郁症超话帖子'
         verbose_name_plural = verbose_name
         db_table = 'blogs'
 
@@ -29,7 +29,7 @@ class CreatorInfo(models.Model):
     remark_text = models.CharField(max_length=2048,blank=True, null=True,verbose_name='备注')
 
     class Meta:
-        verbose_name = '超话用户'
+        verbose_name = '抑郁症超话粉丝'
         verbose_name_plural = verbose_name
         db_table = 'supertopic_fans'
 
@@ -42,7 +42,7 @@ class TopicWord(models.Model):
     keyword = models.CharField( max_length=10, verbose_name='超话关键词')
     count = models.CharField(max_length=7, verbose_name='超话关键词词频')
     class Meta:
-        verbose_name = '超话关键词'
+        verbose_name = '抑郁症超话关键词'
         verbose_name_plural = verbose_name
         db_table = 'topic_keywords'
 
@@ -55,7 +55,7 @@ class CustomText(models.Model):
     text_sentiment_score = models.FloatField(blank=True, null=True, verbose_name='情感分值')
 
     class Meta:
-        verbose_name = '人工输入文本'
+        verbose_name = '自定义分析'
         verbose_name_plural = verbose_name
         db_table = 'custom_texts'
 
