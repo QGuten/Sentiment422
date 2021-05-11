@@ -2,6 +2,7 @@
 from datetime import datetime
 from matplotlib import pyplot as plt, ticker
 from matplotlib.ticker import MultipleLocator
+from pylab import *
 
 
 def fans_trend(x,y):
@@ -14,16 +15,18 @@ def fans_trend(x,y):
 	# 	print(dt, type(dt))
 	# 	x.append(dt)
 	plt.figure(figsize=(12, 4))
+	plt.rcParams['font.sans-serif'] = ['SimHei']
+	plt.rcParams['axes.unicode_minus'] = False
 	# plt.ylim([-100.000000000, 100.000000000])
 	plt.gca().yaxis.set_major_formatter(ticker.FormatStrFormatter('%.6f'))
 	y_major_locator = MultipleLocator(1.000000)
 	plt.tick_params(labelsize=10)  # 刻度字体大小13
 	# plt.plot(x, y, color="blue", linestyle="--")  # 为线条设置样式，并且填上标签
-	plt.rcParams['font.sans-serif'] = ['SimHei']
+
 	plt.rc("font", family='YouYuan', weight="bold")
 	plt.xlabel("时间(年-月)")
 	plt.ylabel('情感分值')
 	plt.title('个人情感变化折点图')
-	plt.scatter(x,y)
+	plt.scatter(x,y,20,'r')
 	plt.show()
 # fans_trend()

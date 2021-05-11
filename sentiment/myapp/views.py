@@ -37,10 +37,10 @@ try:
     # def get_sentiment():
     #     extract_blog_sentiment()
 
-    # 定时任务3，更新超话用户帖子数目及个人情感
-    @register_job(scheduler, "cron", hour=20,minute=30,id='计算超话粉丝情感倾向及发帖次数', replace_existing=True)
-    def get_creator_sentiment():
-        cul_creator_sentiment()
+    # 定时任务3，更新超话用户帖子总数、比较消极帖子数、非常消极贴子数及个人情感
+    # @register_job(scheduler, "cron", hour=20,minute=30,id='计算超话粉丝情感倾向及发帖次数', replace_existing=True)
+    # def get_creator_sentiment():
+    #     cul_creator_sentiment()
 
     register_events(scheduler)      # 监控任务
     scheduler.start()       # 调度器开始
@@ -62,11 +62,10 @@ def extract_blog_sentiment():
                          names=['BSkey', 'BSscore'])
     BSkey = BSdf['BSkey'].values.tolist()
     BSscore = BSdf['BSscore'].values.tolist()
-    objs = BlogInfo.objects.filter(sentiment_score__isnull=True)
+    objs = BlogInfo.objects.filter(sentiment='抑郁')
     for obj in objs:
         blog_content = obj.blog_content
         blog_id = obj.blog_id
-        print(blog_id)
         segs = jieba.lcut(blog_content, cut_all=True, HMM=False)  # 返回list，计算得分
         score_list = [BSscore[BSkey.index(x)] for x in segs if (x in BSkey)]
         sentiment_score = sum(score_list)
@@ -76,49 +75,55 @@ def extract_blog_sentiment():
             if x in keys:
                 xx = x
                 sentiment = xx
-                print('xx为:%s'%xx)
+                print('BlogID:%s, xx为:%s，分数：%s'%(blog_id,xx,sentiment_score))
                 BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment, sentiment_score=sentiment_score)
-                print('句子中有明显情感：%s'%sentiment)
+                # print('句子中有明显情感：%s'%sentiment)
         if xx!='未知':
             continue
         else:
-                if sentiment_score > 30:
+                if sentiment_score > 10:
                     sentiment = '积极'
-                elif sentiment_score < 0:
+                elif sentiment_score <= -15:
+                    sentiment = '非常消极'
+                elif sentiment_score < 0 and sentiment_score > -15:
                     sentiment = '消极'
                 else:
                     sentiment = '中性'
-                print('sentiment情感是:%s'%sentiment)
         # print(score,sentiment)
                 BlogInfo.objects.filter(blog_id=blog_id).update(sentiment=sentiment,sentiment_score=sentiment_score)
     print('微博情感提取完毕')
-# extract_blog_sentiment()
+extract_blog_sentiment()
 
 def cul_creator_sentiment():
-    ''' 计算用户贴子数 & 计算超话用户情感 '''
-    print('计算用户贴子数 & 计算超话用户情感')
+    ''' 计算粉丝贴子总数、比较消极与非常消极 & 计算超话用户情感 '''
     objs = CreatorInfo.objects.all()
     for obj in objs:
         avr = BlogInfo.objects.filter(creator_id=obj.creator_id).aggregate(Avg("sentiment_score"))
         avr_score = avr['sentiment_score__avg']
         blog_counts = BlogInfo.objects.filter(creator_id=obj.creator_id).count()
-        CreatorInfo.objects.filter(creator_id=obj.creator_id).update(creator_sentiment_score=avr_score,blog_counts=blog_counts)
+        worse_counts = BlogInfo.objects.filter(creator_id=obj.creator_id, sentiment_score__gt=-15,sentiment_score__lt=0).count()
+        extreme_counts = BlogInfo.objects.filter(creator_id=obj.creator_id, sentiment_score__lte=-15).count()
+        CreatorInfo.objects.filter(creator_id=obj.creator_id).update(creator_sentiment_score=avr_score,blog_counts=blog_counts,worse_counts=worse_counts,extreme_counts=extreme_counts)
     topic_avr = CreatorInfo.objects.filter(creator_sentiment_score__isnull=False).aggregate(Avg("creator_sentiment_score"))
     topic_avr = topic_avr["creator_sentiment_score__avg"]
+    # print(topic_avr)
     for obj in objs:
         if obj.creator_sentiment_score:
             score = obj.creator_sentiment_score
         else:
             continue
-        if score> topic_avr+1:
-            sentiment = '积极'
-        elif score< topic_avr-1:
-            sentiment = '消极'
+        if score>=-0.3:
+            sentiment = '中性/积极（状态良好）'
+        elif score<0.3 and score>=topic_avr:
+            sentiment = '一般消极'
+        elif score<=topic_avr-10:
+            sentiment = '非常消极'
         else:
-            sentiment = '中性'
+            sentiment = '比较消极'
         CreatorInfo.objects.filter(creator_id=obj.creator_id).update(creator_sentiment=sentiment)
+        print(sentiment, score, topic_avr)
     print('完成！！计算用户贴子数 & 计算用户情感')
-cul_creator_sentiment()
+# cul_creator_sentiment()
 
 def tp_wordcloud(request):
     ''' 调用生成超话词云图的程序，生成词云图，响应返回词云图 '''
@@ -149,24 +154,22 @@ def cul_text_sentiment(request):
         segs = jieba.lcut(customtext, cut_all=False, HMM=False)  # 返回list，计算得分
         xx = '未知'
         for x in segs:
-            print('x是:%s'%x)
+            # print('x是:%s'%x)
             score_list = [BSscore[BSkey.index(x)] for x in segs if (x in BSkey)]
             sentiment_score = sum(score_list)
             if x in keys:
                 xx = x
                 sentiment = xx
-                print('句子中有明显情感：%s'%sentiment)
+                # print('句子中有明显情感：%s'%sentiment)
         if xx=='未知':
-                if sentiment_score > 30:
+                if sentiment_score > 10:
                     sentiment = '积极'
-                elif sentiment_score < 0:
-                    sentiment = '消极'
+                elif sentiment_score <= -15:
+                    sentiment = '非常消极'
+                elif sentiment_score < 0 and sentiment_score > -15:
+                    sentiment = '一般消极'
                 else:
                     sentiment = '中性'
-        data = {'sentiment':sentiment,'sentiment_score':sentiment_score}
-        json_data = json.dumps(data)
         # print('结果为：%s,%s'%(sentiment_score,sentiment))
         return render(request, 'myapp/custom_text.html', {'sentiment': sentiment, 'sentiment_score': sentiment_score})
     return render(request, 'myapp/custom_text.html',{'sentiment':sentiment,'sentiment_score':sentiment_score})
-
-#

@@ -11,7 +11,7 @@
   --accent: #f5dd5d;
   --primary-fg: #fff;
 
-  --body-fg: ##92B89D;
+  --body-fg: #92B89D;
   --body-bg: #fff;
   --body-quiet-color: #EEE;
   --body-loud-color: #02C874;
@@ -156,7 +156,7 @@ h1 {
 }
 
 h2 {
-    font-size: 16px;
+    font-size: 20px;
     margin: 1em 0 .5em 0;
 }
 
@@ -591,7 +591,7 @@ input[type=button][disabled].default {
     font-weight: 400;
     font-size: 13px;
     text-align: left;
-    background: var(--primary);
+    background: var(--secondary);
     color: var(--header-link-color);
 }
 

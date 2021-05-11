@@ -43,7 +43,7 @@ class BlogInfoAdmin(admin.ModelAdmin):
         stopwords_file = 'E:\\Sentiment\\dataset\\stopword2.txt'
         jieba.analyse.set_stop_words(stopwords_file)
         blog_content = obj.blog_content
-        keyword = jieba.analyse.extract_tags(blog_content, topK=3)
+        keyword = jieba.analyse.extract_tags(blog_content, topK=3, allowPOS=('v', 'a', 'ag', 'al'))
         # print(keyword)
         return keyword
     blog_keyword.allow_tags = True
@@ -52,14 +52,14 @@ class BlogInfoAdmin(admin.ModelAdmin):
 class CreatorInfoAdmin(admin.ModelAdmin):
     ''' 用户管理模型 '''
     form = CreatorInfoAdminForm
-    list_display = ['creator_nickname', 'gender','blog_counts','remark_text','blogs_by'] # ,
-    readonly_fields = ['creator_nickname', 'creator_id','gender','blog_counts', 'creator_sentiment_score']    # 设置编辑页只读字段
+    list_display = ['creator_nickname', 'gender','creator_sentiment','blogs_by']
+    readonly_fields = ['creator_nickname', 'creator_id','gender','blog_counts','worse_counts','extreme_counts', 'creator_sentiment_score']    # 设置编辑页只读字段
     # list_display_links = []    # 为列表页的昵称字段设置路由地址，该路由地址可进入内容页
     list_max_show_all = 10000000    # 设置列表页显示最大上限数据量
     list_per_page = 11    # 设置每页显示数据量
     #设置可搜索的字段
     search_fields = ['creator_id','creator_nickname']
-    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','gender')}),('超话活跃情况',{'fields':('blog_counts','creator_sentiment_score','creator_sentiment')}),('其它',{'fields':('remark_text',),}))
+    fieldsets = (('基本信息', {'fields':('creator_id','creator_nickname','gender')}),('超话活跃情况',{'fields':('blog_counts','worse_counts','extreme_counts','creator_sentiment_score','creator_sentiment')}),('其它',{'fields':('remark_text',),}))#
     save_as_continue = False    # 点击保存并继续编辑取消
     preserve_filters = True    # 从编辑页返回列表页时保存过滤条件
     formfield_overrides = {models.TextField:{'widget':Textarea(attrs={'rows':5, 'cols':20})},}    # 改变某个字段的文本框

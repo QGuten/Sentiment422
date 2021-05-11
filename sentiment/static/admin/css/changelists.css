@@ -91,11 +91,11 @@
 
 #toolbar {
     padding: 8px 10px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-top: 1px solid var(--hairline-color);
     border-bottom: 1px solid var(--hairline-color);
-    background: var(--darkened-bg);
-    color: var(--body-quiet-color);
+    background: var(--secondary);
+    color: var(--secondary);
 }
 
 #toolbar form input {
@@ -107,8 +107,8 @@
 
 #toolbar #searchbar {
     height: 19px;
-    border: 1px solid var(--border-color);
-    padding: 2px 5px;
+    border: 1px solid var(--secondary);
+    padding: 2px 4px;
     margin: 0;
     vertical-align: top;
     font-size: 13px;
@@ -125,7 +125,7 @@
     padding: 4px 8px;
     margin: 0;
     vertical-align: middle;
-    background: var(--body-bg);
+    background: var(--secondary);
     box-shadow: 0 -15px 20px -10px rgba(0, 0, 0, 0.15) inset;
     cursor: pointer;
     color: var(--body-fg);
@@ -299,13 +299,13 @@
 }
 
 #changelist .actions {
-    padding: 10px;
-    background: var(--body-bg);
+    padding: 6px;
+    background: var(--secondary);
     border-top: none;
     border-bottom: none;
     line-height: 24px;
     color: var(--body-quiet-color);
-    width: 100%;
+    width: 99%;
 }
 
 #changelist .actions.selected { /* XXX Probably unused? */
