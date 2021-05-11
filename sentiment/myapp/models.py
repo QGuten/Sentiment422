@@ -57,7 +57,7 @@ class CustomText(models.Model):
     text_sentiment_score = models.FloatField(blank=True, null=True, verbose_name='情感分值')
 
     class Meta:
-        verbose_name = '自定义分析'
+        verbose_name = '自定义输入分析'
         verbose_name_plural = verbose_name
         db_table = 'custom_texts'
 

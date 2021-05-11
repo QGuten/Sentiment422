@@ -62,7 +62,7 @@
 #changelist .paginator {
     color: var(--body-quiet-color);
     border-bottom: 1px solid var(--hairline-color);
-    background: var(--body-bg);
+    background: var(--secondary);
     overflow: hidden;
 }
 
@@ -246,7 +246,7 @@
     line-height: 22px;
     margin: 0;
     border-top: 1px solid var(--hairline-color);
-    width: 100%;
+    width: 98%;
 }
 
 .paginator a:link, .paginator a:visited {
